@@ -1,8 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from flask_bootstrap import Bootstrap5
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import StringField, SubmitField, SelectField
+from wtforms.validators import DataRequired, URL
 import csv
 
 '''
@@ -25,6 +25,12 @@ Bootstrap5(app)
 
 class CafeForm(FlaskForm):
     cafe = StringField('Cafe name', validators=[DataRequired()])
+    location = StringField('Cafe Location on google maps(URL)', validators=[DataRequired(), URL(message='Invalid URL')])
+    opening_time = StringField('Opening Time e.g. 8AM', validators=[DataRequired()])
+    closing_time = StringField('Closing Time e.g. 5:30PM', validators=[DataRequired()])
+    coffee_rating = SelectField('Coffee Rating:', choices=['✘', '☕', '☕☕', '☕☕☕', '☕☕☕☕', '☕☕☕☕☕'], default='☕')
+    wifi = SelectField('WiFi Rating:', choices=['✘', '💪', '💪💪', '💪💪💪', '💪💪💪💪', '💪💪💪💪💪'], default='💪')
+    power = SelectField('Power Rating:', choices=['✘', '🔌', '🔌🔌', '🔌🔌🔌', '🔌🔌🔌🔌', '🔌🔌🔌🔌🔌'], default='🔌')
     submit = SubmitField('Submit')
 
 # Exercise:
@@ -42,11 +48,24 @@ def home():
     return render_template("index.html")
 
 
-@app.route('/add')
+@app.route('/add', methods=['GET', 'POST'])
 def add_cafe():
     form = CafeForm()
     if form.validate_on_submit():
-        print("True")
+        cafe_name = form.cafe.data
+        cafe_location = form.location.data
+        open_time = form.opening_time.data
+        close_time = form.closing_time.data
+        coffee = form.coffee_rating.data
+        wifi = form.wifi.data
+        power = form.power.data
+        row = [cafe_name, cafe_location, open_time, close_time, coffee, wifi, power]
+        with open('cafe-data.csv', mode='a', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            # Write the data to the file
+            writer.writerow(row)
+        return redirect(url_for('cafes'))
+
     # Exercise:
     # Make the form write a new row into cafe-data.csv
     # with   if form.validate_on_submit()
