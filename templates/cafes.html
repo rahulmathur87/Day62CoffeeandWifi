@@ -25,7 +25,7 @@
             <tr>
             {% for cafe_data in cafes[row] %}
               <td>
-                  {% if cafes[row].index(cafe_data) == 1: %}
+                  {% if "https://goo.gl/maps/" in cafe_data: %}
                     <a href="{{ cafe_data }}" target="_blank">Maps Link</a>
                   {% else %}
                     {{ cafe_data }}
